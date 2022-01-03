@@ -1,0 +1,105 @@
+
+// Copyright © SixtyFPS GmbH <info@sixtyfps.io>
+// SPDX-License-Identifier: (GPL-3.0-only OR LicenseRef-SixtyFPS-commercial)
+
+import { VerticalBox, Button, LineEdit, StandardListView, GridBox, HorizontalBox} from "sixtyfps_widgets.60";
+import { IndoorTemperature, Humidity} from "gui_elements.60";
+
+
+// ----------------------------------------------------------------------------------------------
+// MainWindow
+// ----------------------------------------------------------------------------------------------
+
+/* ---------------------------------------------------------------- 
+MainContent := VerticalLayout {
+    HorizontalBox {        
+        StandardListView {        
+            model: [{ text: "UUID 0x0001"}, {text: "UUID 0x0002"}, {text: "UUID 0x0003"}];
+        }
+
+        GridBox {
+            IndoorTemperature {row: 0; col: 1;}
+            Text { col: 2; row: 1; text: "Temperature: "; }
+            temp-edit := LineEdit { text: ""; }
+            Humidity { row: 1; col: 1;}
+            Text { col: 2; row: 2; text: "Humidity: "; }
+            hum-edit := LineEdit { text: ""; }
+            Text { col: 2; row: 3; text: "Pressure: "; }
+            pres-edit := LineEdit { text: ""; }
+        }
+    }
+
+    HorizontalBox {
+        alignment: start;
+        btn := Button { 
+            text: "Run"; 
+            clicked => {
+                root.run_bluetooth(true);
+            }
+        }
+        Button { text: "Update"; }
+        
+        Button { 
+            text: "Stop"; 
+            clicked => {
+                root.stop_bluetooth();
+            }
+        }
+    }    
+}
+---------------------------------------------------------------- */
+
+MainWindow := Window {
+    title: "BLE Explorer";
+    preferred-width: 600px;
+    preferred-height: 600px;
+
+    property<float> temperature;
+    property<float> humidity;
+
+    callback quit();
+    callback run_bluetooth();
+    callback stop_bluetooth();
+
+    HorizontalLayout {
+        padding: 0; spacing: 0;
+        // MenuBar {}
+        // MainContent {}
+        VerticalLayout {
+            spacing: 24px;
+            HorizontalBox {        
+                StandardListView {        
+                    model: [{ text: "UUID 0x0001"}, {text: "UUID 0x0002"}, {text: "UUID 0x0003"}];
+                }
+
+                GridBox {
+                    IndoorTemperature {row: 0; col: 1;}
+                    Text { col: 2; row: 1; text: "Temperature: "; }
+                    temp-edit := LineEdit { text: ""; }
+                    Humidity { row: 1; col: 1;}
+                    Text { col: 2; row: 2; text: "Humidity: "; }
+                    hum-edit := LineEdit { text: ""; }
+                    Text { col: 2; row: 3; text: "Pressure: "; }
+                    pres-edit := LineEdit { text: ""; }
+                }
+            }
+
+            HorizontalBox {
+                alignment: start;
+                btn := Button { 
+                    text: "Run"; 
+                    clicked => {
+                        root.run_bluetooth();
+                    }
+                }
+                Button { text: "Update"; }
+                Button { 
+                    text: "Stop"; 
+                    clicked => {
+                        root.stop_bluetooth();
+                    }
+                }
+            }
+        }
+    }
+}

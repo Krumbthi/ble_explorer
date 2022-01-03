@@ -1,0 +1,170 @@
+import { Button } from "sixtyfps_widgets.60";
+
+// ----------------------------------------------------------------------------------------------
+// Move to seperate file
+// ----------------------------------------------------------------------------------------------
+/*
+struct Palette := {
+    menuBar : brush,
+    mainContent : brush,
+    box : brush,
+    lightDisplay : brush,
+    pieChart : brush,
+    roundButton : brush,
+    weekdayBox : brush,
+    text : brush,
+    shadow : brush,
+}*/
+
+global Skin := {
+    property<bool> day: true;
+    
+    /*
+    property<Palette> palette : day ? {
+       menuBar : #6D7BFB,
+       mainContent :  #fbfbfb,
+       box :   #ffffff,
+       lightDisplay : #ffffff,
+       pieChart : #ffffff,
+       roundButton : #f7f7f7,
+       weekdayBox : #f4f4f4,
+       text : #000,
+       shadow : #0001, // ### added alpha
+    } : {
+       menuBar : #2937A7,
+       mainContent : #040404,
+       box : #000000,
+       lightDisplay : #000000,
+       pieChart : #000000,
+       roundButton : #0a0a0a,
+       weekdayBox : #0c0c0c,
+       text : #fff,
+       shadow : #fff1, // ### added alpha
+    };*/
+
+    // From Skin::initHints in Skin.cpp
+    property <length> DefaultFont: 12px;
+    property <length> TinyFont: 9px;
+    property <length> SmallFont: 10px;
+    property <length> MediumFont: 13px;
+    property <length> LargeFont: 20px;
+    property <length> HugeFont: 27px; // (also, bold)
+    property <length> TitleFont: 10px; // (also, bold)
+}
+
+BoxBase := Rectangle {
+    // background: Skin.palette.box;
+    drop-shadow-offset-x: 6px;
+    drop-shadow-offset-y: 6px;
+    drop-shadow-blur: 6px;
+    // drop-shadow-color: Skin.palette.shadow;
+}
+
+Box := BoxBase {
+    property <string> title;
+    VerticalLayout {
+        if (root.title != "") : Text {
+            text <=> root.title;
+            font-size: Skin.TitleFont;
+            font-weight: 700;
+        }
+        spacing: 10px;
+        padding: 15px;
+        @children
+    }
+}
+
+RoundedIcon := Rectangle {
+    property <bool> isBright;
+    property <bool> isSmall;
+    property <image> iconName <=> m-graphicLabel.source;
+    property <float> background-opacity <=> background-fill.opacity;
+    height: isSmall ? 60px : 68px;
+    width: isSmall ? 60px : 68px;
+    background-fill := Rectangle {
+        background: isBright ? @linear-gradient(180deg, #ff7d34, #ff3122) : @linear-gradient(180deg, #6776FF, #6100FF);
+        border-radius: 6px;
+        opacity: 1.0;
+    }
+    m-graphicLabel := Image {
+        x: (parent.width - width) / 2;
+        y: (parent.height - height) / 2;
+    }
+}
+
+TitleAndValueBox := VerticalLayout {
+    padding: 8px;
+    spacing: 8px;
+    horizontal-stretch: 100;
+}
+
+ButtonValueLabel := Text {
+    property <string> value <=> text;
+    font-size: Skin.HugeFont;
+    font-weight: 700;
+    color: #929cb2;
+}
+
+RoundButton := Image { //### QskPushButton
+    property <bool> is-up; // ### QskAspect
+    callback clicked <=> ta.clicked;
+    property <color> color: #929CB2; // Taken from the fill in the svg itself.
+    width: 30px;
+    Image {
+        source: is-up ? @image-url("images/up.svg") : @image-url("images/down.svg");
+        x: (parent.width - width) / 2;
+        y: (parent.height - height) / 2;
+        // Deviation from qskinny: Show a darker color when pressing the button to provide feedback.
+        colorize: ta.pressed ? color.darker(80%) : color;
+    }
+    ta := TouchArea {  }
+}
+
+UpAndDownButton := Rectangle {
+    callback changed(int);
+    // FIXME: this is actually on the RoundButton
+    border-radius: width/2;
+    // background: Skin.palette.roundButton;
+    VerticalLayout {
+        u := RoundButton { is-up: true;  clicked => { changed(+1) }}
+        d := RoundButton { is-up: false; clicked => { changed(-1) }}
+    }
+}
+
+BoxWithButtons := Box {
+    callback changed <=> btns.changed;
+    property <image> iconFile <=> ri.iconName; //### in original, this is derived from title
+    property <string> value <=> val.value;
+    property <bool> isBright <=> ri.isBright;
+    property <string> title- <=> titleLabel.text;
+    HorizontalLayout {
+        spacing: 20px;
+        ri := RoundedIcon { }
+        TitleAndValueBox {
+            titleLabel := Text {
+                font-size: Skin.TitleFont;
+                font-weight: 700;
+            }
+            val := ButtonValueLabel { }
+        }
+        btns := UpAndDownButton { }
+    }
+}
+
+export IndoorTemperature := BoxWithButtons {
+    property <int> temperature: 24;
+    title-: "Temperature";
+    iconFile: @image-url("images/temperature.png");
+    value: (temperature < 0 ? "" : "+") + temperature;
+    isBright: true;
+    changed(delta) => { temperature += delta; }
+}
+
+export Humidity := BoxWithButtons {
+    property <int> humidity-percent : 30;
+    title-: "Humidity";
+    iconFile: @image-url("images/humidity.png");
+    value: humidity-percent + "%";
+    isBright: false;
+    changed(delta) => { humidity-percent += delta; }
+}
