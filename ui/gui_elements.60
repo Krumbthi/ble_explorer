@@ -1,4 +1,4 @@
-import { Button } from "sixtyfps_widgets.60";
+import { Button, LineEdit } from "sixtyfps_widgets.60";
 
 // ----------------------------------------------------------------------------------------------
 // Move to seperate file
@@ -111,7 +111,7 @@ RoundButton := Image { //### QskPushButton
     property <color> color: #929CB2; // Taken from the fill in the svg itself.
     width: 30px;
     Image {
-        source: is-up ? @image-url("images/up.svg") : @image-url("images/down.svg");
+        source: is-up ? @image-url("images/up.png") : @image-url("images/down.png");
         x: (parent.width - width) / 2;
         y: (parent.height - height) / 2;
         // Deviation from qskinny: Show a darker color when pressing the button to provide feedback.
@@ -152,7 +152,7 @@ BoxWithButtons := Box {
 }
 
 export IndoorTemperature := BoxWithButtons {
-    property <int> temperature: 24;
+    property <float> temperature: 24;
     title-: "Temperature";
     iconFile: @image-url("images/temperature.png");
     value: (temperature < 0 ? "" : "+") + temperature;
@@ -161,10 +161,35 @@ export IndoorTemperature := BoxWithButtons {
 }
 
 export Humidity := BoxWithButtons {
-    property <int> humidity-percent : 30;
+    property <float> humidity : 30;
     title-: "Humidity";
     iconFile: @image-url("images/humidity.png");
-    value: humidity-percent + "%";
+    value: humidity + "%";
     isBright: false;
-    changed(delta) => { humidity-percent += delta; }
+    changed(delta) => { humidity += delta; }
+}
+
+
+export Pressure := BoxWithButtons {
+    property <float> pressure : 900;
+    title-: "Pressure";
+    iconFile: @image-url("images/dashboard.png");
+    value: pressure + "kPa";
+    isBright: false;
+    changed(delta) => { pressure += delta; }
+}
+
+export StatusBar := Rectangle {
+    property <string> info;
+    height: 40px;
+    LineEdit {
+        horizontal-stretch: 1;
+        vertical-stretch: 1;
+        text: "Status: " + info;
+    }
+}
+
+export Label := Text {
+    font-size: 28px;
+    horizontal-stretch: 1;
 }

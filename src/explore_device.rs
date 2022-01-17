@@ -10,7 +10,8 @@ use blurz::{
 };
 use log::{info, debug, error};
 
-const UUID_REGEX: &str = r"([0-9a-f]{8})-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}";
+//const UUID_REGEX: &str = r"([0-9a-f]{8})-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}";
+const UUID_REGEX: &str = r"([0-9a-f]{8})-([0-9a-f]{4}-){3}([0-9a-f]{12})";
 
 pub fn explore_gatt_profile(session: &BluetoothSession, device: &BluetoothDevice) { // -> Result<String, Box<dyn Error>> {
     info!("{}", device.get_name().unwrap());
@@ -108,31 +109,41 @@ pub fn find_characteristic_path(session: &BluetoothSession, device: &BluetoothDe
     for service_path in services_list {
         let service = BluetoothGATTService::new(session, service_path.clone());
         let uuid = service.get_uuid().unwrap();
-        let assigned_number = RE.captures(&uuid).unwrap().get(5).map_or("", |m| m.as_str());
 
-        debug!("Service UUID: {:?} Assigned Number: 0x{:?}", uuid, assigned_number);
-        let characteristics = match service.get_gatt_characteristics() {
-            Ok(characteristics) => characteristics,
-            Err(e) => {
-                error!("Failed to get characteristics: {:?}", e);
-                vec![format!("Error: {:?}", e)]
-            }
-        };
-        
-        for characteristic_path in characteristics {
-            let characteristic = BluetoothGATTCharacteristic::new(session, characteristic_path.clone());
-            let flags = characteristic.get_flags().unwrap();
+        let assigned_number = RE.captures(&uuid).unwrap().get(3).map_or("", |m| m.as_str());
+        debug!("Service UUID: {:?} Assigned Number: 0x{:?}", uuid, &assigned_number);
 
-            if flags.contains(&String::from("notify")) {
+        if assigned_number.contains("0000feedc0da") {
+            let characteristics = match service.get_gatt_characteristics() {
+                Ok(characteristics) => characteristics,
+                Err(e) => {
+                    error!("Failed to get characteristics: {:?}", e);
+                    vec![format!("Error: {:?}", e)]
+                }
+            };
+            
+            for characteristic_path in characteristics {
+                let characteristic = BluetoothGATTCharacteristic::new(session, characteristic_path.clone());
+                let flags = characteristic.get_flags().unwrap();
+                
+                let descriptors = match characteristic.get_gatt_descriptors() {
+                    Ok(descriptors) => descriptors,
+                    Err(e) => {
+                        error!("Failed to get descriptors: {:?}", e);
+                        vec![format!("Error: {:?}", e)]
+                    }
+                };
+                
+                for descriptor_path in descriptors {
+                    explore_gatt_descriptor(&session, descriptor_path);
+                }
                 debug!(" Characteristic ID: {:?} Assigned Number: 0x{:?} Flags: {:?}", characteristic_path, assigned_number, flags);
                 return characteristic_path;
-            } else {
-                //format!("")
-                continue;
             }
-        }
-        ()
-    }
+        } else {
+            ()
+        }           
+    }    
     format!("")
 }
 

@@ -3,102 +3,100 @@
 // SPDX-License-Identifier: (GPL-3.0-only OR LicenseRef-SixtyFPS-commercial)
 
 import { VerticalBox, Button, LineEdit, StandardListView, GridBox, HorizontalBox} from "sixtyfps_widgets.60";
-import { IndoorTemperature, Humidity} from "gui_elements.60";
+import { IndoorTemperature, Humidity, Pressure, StatusBar} from "gui_elements.60";
 
 
+export global AppActions := {
+    callback run_bluetooth();
+    callback stop_bluetooth();
+    callback update_bluetooth();
+
+    //callback uninstall(string);
+    //property<[InstalledCrate]> crates;
+}
 // ----------------------------------------------------------------------------------------------
 // MainWindow
 // ----------------------------------------------------------------------------------------------
-
-/* ---------------------------------------------------------------- 
-MainContent := VerticalLayout {
-    HorizontalBox {        
-        StandardListView {        
-            model: [{ text: "UUID 0x0001"}, {text: "UUID 0x0002"}, {text: "UUID 0x0003"}];
-        }
-
-        GridBox {
-            IndoorTemperature {row: 0; col: 1;}
-            Text { col: 2; row: 1; text: "Temperature: "; }
-            temp-edit := LineEdit { text: ""; }
-            Humidity { row: 1; col: 1;}
-            Text { col: 2; row: 2; text: "Humidity: "; }
-            hum-edit := LineEdit { text: ""; }
-            Text { col: 2; row: 3; text: "Pressure: "; }
-            pres-edit := LineEdit { text: ""; }
-        }
-    }
-
-    HorizontalBox {
-        alignment: start;
-        btn := Button { 
-            text: "Run"; 
-            clicked => {
-                root.run_bluetooth(true);
-            }
-        }
-        Button { text: "Update"; }
-        
-        Button { 
-            text: "Stop"; 
-            clicked => {
-                root.stop_bluetooth();
-            }
-        }
-    }    
-}
----------------------------------------------------------------- */
-
 MainWindow := Window {
     title: "BLE Explorer";
     preferred-width: 600px;
-    preferred-height: 600px;
+    preferred-height: 230px;
 
-    property<float> temperature;
-    property<float> humidity;
+    property<string> temperature <=> temp-edit.text;
+    property<string> humidity <=> hum-edit.text;
+    property<string> pressure <=> pres-edit.text;
+    property <string> info <=> le.text;
 
-    callback quit();
+    /*callback quit();
     callback run_bluetooth();
-    callback stop_bluetooth();
+    callback stop_bluetooth();*/
 
-    HorizontalLayout {
-        padding: 0; spacing: 0;
-        // MenuBar {}
-        // MainContent {}
-        VerticalLayout {
-            spacing: 24px;
-            HorizontalBox {        
-                StandardListView {        
-                    model: [{ text: "UUID 0x0001"}, {text: "UUID 0x0002"}, {text: "UUID 0x0003"}];
+    VerticalLayout {
+        spacing: 24px;
+        HorizontalBox {        
+            StandardListView {        
+                model: [{ text: "UUID 0x0001"}, {text: "UUID 0x0002"}, {text: "UUID 0x0003"}];
+            }
+                
+            GridBox {
+                /*
+                temp := IndoorTemperature {
+                    row: 0; 
+                    col: 1;
                 }
+                num := Humidity { 
+                    row: 1; 
+                    col: 1;
+                }
+                pres := Pressure { 
+                    row: 2; 
+                    col: 1;
+                }
+                */
+                Text { col: 0; row: 0; text: "Temperature: "; }
+                temp-edit := LineEdit {}
+                
+                Text { col: 0; row: 1; text: "Humidity: "; }
+                hum-edit := LineEdit {}
+                                
+                Text { col: 0; row: 2; text: "Pressure: "; }
+                pres-edit := LineEdit {}
+            }
+        }
 
-                GridBox {
-                    IndoorTemperature {row: 0; col: 1;}
-                    Text { col: 2; row: 1; text: "Temperature: "; }
-                    temp-edit := LineEdit { text: ""; }
-                    Humidity { row: 1; col: 1;}
-                    Text { col: 2; row: 2; text: "Humidity: "; }
-                    hum-edit := LineEdit { text: ""; }
-                    Text { col: 2; row: 3; text: "Pressure: "; }
-                    pres-edit := LineEdit { text: ""; }
+        HorizontalLayout {
+            alignment: start;
+            horizontal-stretch: 1;
+
+            Button {
+                width: parent.width/3;
+                text: "Run"; 
+                clicked => {
+                    AppActions.run_bluetooth();
                 }
             }
+            
+            Button { 
+                text: "Update"; 
+                width: parent.width/3;
+                clicked => { AppActions.update_bluetooth() }
+            }
 
-            HorizontalBox {
-                alignment: start;
-                btn := Button { 
-                    text: "Run"; 
-                    clicked => {
-                        root.run_bluetooth();
-                    }
+            Button { 
+                width: parent.width/3;
+                text: "Stop"; 
+                clicked => {
+                    AppActions.stop_bluetooth();
                 }
-                Button { text: "Update"; }
-                Button { 
-                    text: "Stop"; 
-                    clicked => {
-                        root.stop_bluetooth();
-                    }
-                }
+            }
+        }
+
+        sb:= Rectangle {
+            height: 30px;
+            le := LineEdit {
+                horizontal-stretch: 1;
+                vertical-stretch: 1;
+                background: @linear-gradient(90deg, #3f87a6 0%, #ebf8e1 50%, #f69d3c 100%);
             }
         }
     }
