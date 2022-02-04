@@ -27,9 +27,10 @@ MainWindow := Window {
     property<string> pressure <=> pres-edit.text;
     property <string> info <=> le.text;
 
-    /*callback quit();
+    callback quit();
     callback run_bluetooth();
-    callback stop_bluetooth();*/
+    callback stop_bluetooth();
+    callback update_bluetooth();
 
     VerticalLayout {
         spacing: 24px;
